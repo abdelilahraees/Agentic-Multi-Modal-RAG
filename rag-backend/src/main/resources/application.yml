@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: rag-backend
+
+  # --- Datasource : pointe vers le pgvector remonté par docker-compose ---
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ragdb}
+    username: ${DB_USER:raguser}
+    password: ${DB_PASSWORD:ragpass}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate     # schéma géré par Flyway, pas par Hibernate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# --- Configuration Langchain4j (utilisée par nos beans dans AiConfig) ---
+app:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat-model: gpt-4o
+      embedding-model: text-embedding-3-small
+      timeout-seconds: 60
+    rag:
+      max-results: 5
+      min-score: 0.6
+      chunk-size: 500
+      chunk-overlap: 50
+    memory:
+      max-messages: 20
+
+# Endpoints d'observabilité utiles pour piloter l'agent en prod
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
