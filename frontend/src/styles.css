@@ -1,1 +1,71 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7fb;
+  --surface: #ffffff;
+  --surface-2: #f0f1f6;
+  --border: #e1e3ec;
+  --text: #1c1d24;
+  --muted: #6b6f80;
+  --accent: #4f46e5;
+  --accent-soft: #e6e5fc;
+  --danger: #c62828;
+  --positive: #1b7f3b;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121318;
+    --surface: #1b1c23;
+    --surface-2: #16171d;
+    --border: #2c2e38;
+    --text: #e8e9ef;
+    --muted: #9a9db0;
+    --accent: #8b85ff;
+    --accent-soft: #2a2856;
+    --danger: #ff6b6b;
+    --positive: #5fd38a;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+h2 { font-size: 1rem; margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .8rem; }
+.error { color: var(--danger); font-size: .85rem; white-space: pre-line; margin: .5rem 0; }
+
+input[type='text'], textarea {
+  font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: .55rem .7rem;
+}
+input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.btn { font: inherit; border-radius: 10px; border: 1px solid transparent; padding: .55rem .9rem;
+  cursor: pointer; background: none; color: inherit; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn.ghost { border-color: var(--border); background: var(--surface); }
+.btn.ghost:hover { border-color: var(--accent); }
+.btn.small { padding: .2rem .5rem; font-size: .8rem; }
+
+.chip { font: inherit; font-size: .85rem; border: 1px solid var(--border); background: var(--surface);
+  color: inherit; border-radius: 999px; padding: .4rem .8rem; cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.tag { font-size: .75rem; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: .1rem .5rem; color: var(--muted); }
+
+/* Panneaux de la barre latérale */
+.panel { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .75rem; }
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.list li { display: flex; align-items: center; gap: .5rem; padding: .35rem 0; border-bottom: 1px solid var(--border); }
+.list li:last-child { border-bottom: 0; }
+.list .meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.amount { font-variant-numeric: tabular-nums; color: var(--positive); white-space: nowrap; }
+.amount.negative { color: var(--text); }
+.dropzone { display: block; text-align: center; border: 1.5px dashed var(--border); border-radius: 10px;
+  padding: .9rem; cursor: pointer; margin-bottom: .5rem; font-size: .9rem; }
+.dropzone:hover { border-color: var(--accent); }
+.dropzone.busy { cursor: progress; opacity: .7; }

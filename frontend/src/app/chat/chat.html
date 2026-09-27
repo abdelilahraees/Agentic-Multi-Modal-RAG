@@ -1,0 +1,80 @@
+<header class="chat-header">
+  <div>
+    <h1>Assistant</h1>
+    <p class="muted">Agent RAG multimodal · documents, images et transactions</p>
+  </div>
+  <button type="button" class="btn ghost" (click)="newConversation()">Nouvelle conversation</button>
+</header>
+
+<section class="messages" #scroller aria-live="polite">
+  @if (messages().length === 0) {
+    <div class="empty">
+      <p>Posez une question sur vos documents, joignez une image ou demandez une action.</p>
+      <div class="suggestions">
+        @for (s of suggestions; track s) {
+          <button type="button" class="chip" (click)="send(s)">{{ s }}</button>
+        }
+      </div>
+    </div>
+  }
+
+  @for (m of messages(); track $index) {
+    <article class="msg" [class]="m.role">
+      @if (m.imagePreview) {
+        <img class="thumb" [src]="m.imagePreview" alt="Image jointe" />
+      }
+      <div class="text">{{ m.text }}</div>
+
+      @if (m.toolsUsed?.length) {
+        <div class="tools">
+          @for (t of m.toolsUsed; track t) {
+            <span class="tag">⚙ {{ t }}</span>
+          }
+        </div>
+      }
+
+      @if (m.sources?.length) {
+        <details class="sources">
+          <summary>{{ m.sources!.length }} source(s)</summary>
+          @for (s of m.sources; track $index) {
+            <div class="source">
+              <strong>{{ s.source }}</strong>
+              @if (s.score != null) {
+                <span class="muted"> · {{ formatScore(s.score) }}</span>
+              }
+              <p>{{ s.snippet }}</p>
+            </div>
+          }
+        </details>
+      }
+    </article>
+  }
+
+  @if (sending()) {
+    <article class="msg assistant pending"><span class="dots">L’agent réfléchit</span></article>
+  }
+</section>
+
+<form class="composer" (submit)="$event.preventDefault(); send()">
+  @if (imagePreview()) {
+    <div class="attachment">
+      <img [src]="imagePreview()" alt="Aperçu de l'image jointe" />
+      <button type="button" class="btn ghost small" (click)="clearImage()" aria-label="Retirer l'image">✕</button>
+    </div>
+  }
+  <div class="row">
+    <input #fileInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+    <button type="button" class="btn ghost" (click)="pickImage()" title="Joindre une image" aria-label="Joindre une image">
+      🖼
+    </button>
+    <textarea
+      name="draft"
+      rows="2"
+      placeholder="Votre message… (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      (keydown)="onKeydown($event)"
+    ></textarea>
+    <button type="submit" class="btn primary" [disabled]="!canSend()">Envoyer</button>
+  </div>
+</form>

@@ -11,6 +11,7 @@ import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.ragbackend.config.AiConfig.AiProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class RagRetrievalTool {
 
     private final EmbeddingStore<TextSegment> embeddingStore;
     private final EmbeddingModel embeddingModel;
+    private final AiProperties props;
 
     @Tool("""
             Recherche dans la base documentaire vectorielle les passages les plus
@@ -40,14 +42,17 @@ public class RagRetrievalTool {
             @P("Question ou concept à rechercher, formulé en langage naturel") String query,
             @P("Nombre maximum de passages à retourner (recommandé : 3 à 5)") int maxResults) {
 
-        log.info("RAG tool called: query='{}', maxResults={}", query, maxResults);
+        int safeMax = Math.max(1, Math.min(maxResults, 10));
+        log.info("RAG tool called: query='{}', maxResults={}", query, safeMax);
 
         Embedding queryEmbedding = embeddingModel.embed(query).content();
 
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
                 .queryEmbedding(queryEmbedding)
-                .maxResults(maxResults)
-                .minScore(0.5)
+                .maxResults(safeMax)
+                // Seuil un peu plus permissif que le retriever automatique :
+                // l'agent a formulé lui-même la requête, on lui laisse plus de matière.
+                .minScore(Math.max(0.0, props.getRag().getMinScore() - 0.1))
                 .build();
 
         EmbeddingSearchResult<TextSegment> result = embeddingStore.search(request);
