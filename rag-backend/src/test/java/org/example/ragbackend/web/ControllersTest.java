@@ -88,6 +88,18 @@ class ControllersTest {
     }
 
     @Test
+    void aiProviderFailureGives502WithoutStackTrace() throws Exception {
+        when(chatService.chat("c1", "demo", "Bonjour"))
+                .thenThrow(new RuntimeException(new java.io.IOException("Tunnel failed, got: 403")));
+
+        mvc.perform(post("/api/chat").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"conversationId\":\"c1\",\"message\":\"Bonjour\"}"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("OPENAI_API_KEY")))
+                .andExpect(jsonPath("$.trace").doesNotExist());
+    }
+
+    @Test
     void resetConversation() throws Exception {
         mvc.perform(delete("/api/chat/c1")).andExpect(status().isNoContent());
         verify(chatService).reset("c1");
