@@ -20,6 +20,14 @@ spring:
     enabled: true
     baseline-on-migrate: true
 
+  # En dev (mvnw spring-boot:run depuis rag-backend/), Spring Boot démarre
+  # automatiquement le Postgres du compose.yaml racine. Désactivé en tests et
+  # absent du jar packagé. Sans Docker : SPRING_DOCKER_COMPOSE_ENABLED=false.
+  docker:
+    compose:
+      file: ../compose.yaml
+      lifecycle-management: start-only
+
   servlet:
     multipart:
       max-file-size: 50MB
@@ -29,17 +37,24 @@ spring:
 app:
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:}
+      # Valeur factice par défaut pour que l'application démarre sans clé :
+      # les appels IA échoueront (502) tant qu'OPENAI_API_KEY n'est pas défini.
+      api-key: ${OPENAI_API_KEY:missing-openai-api-key}
       chat-model: gpt-4o
       embedding-model: text-embedding-3-small
       timeout-seconds: 60
+      log-requests: false
     rag:
+      table: embeddings
       max-results: 5
       min-score: 0.6
       chunk-size: 500
       chunk-overlap: 50
     memory:
       max-messages: 20
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
 
 # Endpoints d'observabilité utiles pour piloter l'agent en prod
 management:
