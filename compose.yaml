@@ -1,6 +1,7 @@
 services:
   # PostgreSQL avec l'extension pgvector pré-installée.
   # L'image officielle 'pgvector/pgvector' embarque l'extension prête à activer.
+  # C'est le seul service démarré par défaut (et par Spring Boot en dev).
   postgres:
     image: pgvector/pgvector:pg16
     environment:
@@ -16,6 +17,27 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # Stack complète : docker compose --profile app up --build
+  backend:
+    profiles: ["app"]
+    build: ./rag-backend
+    environment:
+      DB_HOST: postgres
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-missing-openai-api-key}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["app"]
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
 
 volumes:
   pgdata:
